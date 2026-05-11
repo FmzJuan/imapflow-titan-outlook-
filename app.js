@@ -2,6 +2,34 @@ require('dotenv').config();
 const { ImapFlow } = require('imapflow');
 const fs = require('fs');
 const path = require('path');
+const util = require('util');
+
+//sistema de log .txt 
+const arquivoDeLog = path.join(__dirname, 'log.txt');
+const logOriginal = console.log;
+const errorOriginal = console.error;
+
+function formatarDataHora(){
+    return new Date().toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo'})
+}
+// Intercepta os console.log normais
+console.log = function (...args) {
+    const mensagem = util.format(...args);
+    // Cria a linha com Data, Hora e a mensagem
+    const logFormatado = `[${formatarDataHora()}] [INFO] ${mensagem}\n`;
+    
+    fs.appendFileSync(arquivoDeLog, logFormatado); // Salva no arquivo
+    logOriginal.apply(console, args);              // Mostra na tela
+};
+
+// Intercepta os console.error
+console.error = function (...args) {
+    const mensagem = util.format(...args);
+    const logFormatado = `[${formatarDataHora()}] [ERRO] ${mensagem}\n`;
+    
+    fs.appendFileSync(arquivoDeLog, logFormatado); // Salva no arquivo
+    errorOriginal.apply(console, args);            // Mostra na tela
+};
 
 // 1. CONFIGURAÇÃO INDIVIDUAL DE USUÁRIOS
 const CONTAS_OUTLOOK = [
